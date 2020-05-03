@@ -7,6 +7,7 @@ const app = express();
 app.use(cors({ origin: true }));
 
 const serviceAccount = require("./firebase-secret.json");
+const SurveyService = require("./services/survey");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -27,21 +28,20 @@ app.get("/api/events/:eventId/surveys/:surveyId", (req, res) => {
             "Bad request. Request must have eventId and surveyId parameters"
           );
       }
+      
+      const service = new SurveyService(db);
+      const surveyFromService = await service.getSurveyById({
+        eventId,
+        surveyId,
+      });
 
-      const document = db
-        .collection("events")
-        .doc(eventId)
-        .collection("surveys")
-        .doc(surveyId);
-
-      const survey = await document.get();
-
-      if (!survey.exists) {
+      if (!surveyFromService) {
         return res
           .status(400)
           .send("Bad request. There no survey with ID => ", surveyId);
       }
-      return res.status(200).send(survey.data());
+
+      return res.status(200).send(surveyFromService);
     } catch (error) {
       console.error(error);
       return res.status(500).send("Internal server error");
