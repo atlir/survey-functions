@@ -18,7 +18,7 @@ app.post("/api/answers", surveyController.createOrUpdateAnswer);
 app.get("/api/events/:eventId/surveys/:surveyId/answers/:userId", surveyController.getAnswerById);
 
 app.use((req, res, next) => {
-  res.status(404).send("Sorry cant find that!");
+  res.status(404).send("This method is unsupported");
 });
 
 // // Create and Deploy Your First Cloud Functions
