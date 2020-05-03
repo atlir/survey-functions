@@ -3,18 +3,14 @@ const admin = require("firebase-admin");
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+
+
 const app = express();
+
 app.use(cors({ origin: true }));
 
-const serviceAccount = require("./firebase-secret.json");
-const SurveyService = require("./services/survey");
+const SurveyService = require("./services/SurveyService");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE_DB_URL,
-});
-
-const db = admin.firestore();
 
 app.get("/api/events/:eventId/surveys/:surveyId", async (req, res) => {
   try {
@@ -26,7 +22,7 @@ app.get("/api/events/:eventId/surveys/:surveyId", async (req, res) => {
         .send("Bad request. Request must have eventId and surveyId parameters");
     }
 
-    const service = new SurveyService(db);
+    const service = new SurveyService();
     const surveyFromService = await service.getSurveyById({
       eventId,
       surveyId,
@@ -49,7 +45,7 @@ app.post("/api/answers", async (req, res) => {
   try {
     const { eventId, surveyId, uid: answerId, ...answer } = req.body;
 
-    const service = new SurveyService(db);
+    const service = new SurveyService();
 
     const existedAnswer = await service.getAnswerById({
       eventId,

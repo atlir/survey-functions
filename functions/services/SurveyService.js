@@ -1,7 +1,9 @@
-var FieldValue = require('firebase-admin').firestore.FieldValue;
-class SurveyService {
-  constructor(db) {
-    this.db = db;
+const FieldValue = require('firebase-admin').firestore.FieldValue;
+const FirebaseService = require('./FirebaseService');
+
+class SurveyService extends FirebaseService {
+  constructor() {
+    super()
   }
 
   _getSurveysCollection({eventId}){
