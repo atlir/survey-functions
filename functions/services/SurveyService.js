@@ -104,12 +104,7 @@ class SurveyService extends FirebaseService {
         ]
       }
     }
-    console.log('DATA', {
-      answers,
-      numberOfQuestionAnswered,
-      uid: answerId,
-      createdAt,
-    })
+
     answerCollection.doc(answerId).set({
       answers,
       numberOfQuestionAnswered,
