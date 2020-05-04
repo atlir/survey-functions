@@ -1,6 +1,6 @@
 const SurveyService = require("./../services/SurveyService");
 
-const _answerFields = ["uid", "surveyID", "OrganizationID", "questionId", "questionLabel", "answer"];
+const _answerFields = ["uid", "surveyID", "OrganizationID", "questionID", "questionLabel", "answer"];
 
 function _validateAnswerBody(body){
   const fields = Object.keys(body).map(key =>{

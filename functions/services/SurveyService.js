@@ -55,8 +55,11 @@ class SurveyService extends FirebaseService {
   }
 
   async _createNewAnswer({ OrganizationID, surveyID, answerId, newAnswer }) {
-    let numberOfQuestionAnswered = 1;
-    answers = [newAnswer];
+    const numberOfQuestionAnswered = 1;
+    const answers = [newAnswer];
+    const answerCollection = this._getAnswersCollection({ OrganizationID, surveyID });
+    const createdAt = FieldValue.serverTimestamp();
+
     await answerCollection.doc(answerId).set({
       answers,
       numberOfQuestionAnswered,
@@ -65,70 +68,63 @@ class SurveyService extends FirebaseService {
     });
   }
 
-  async createOrUpdateAnswer({ OrganizationID, surveyID, answerId, answer }) {
-    const answerCollection = this._getAnswersCollection({ OrganizationID, surveyID });
-    const surveyQuestions = await this._getSurveyQuestions({
-      OrganizationID,
-      surveyID,
+  async _updateExistedAnswer({ OrganizationID, surveyID, answerId, newAnswer, existedAnswerData }){
+    const numberOfQuestionAnswered = existedAnswerData.answers.length;
+    const answers = existedAnswerData.answers.map((a) => {
+      if (a.questionID === newAnswer.questionID) {
+        return {
+          ...a,
+          ...newAnswer,
+        };
+      }
+      return a;
     });
+    const answerCollection = this._getAnswersCollection({ OrganizationID, surveyID });
+
+    await answerCollection.doc(answerId).set(
+      {
+        answers,
+        numberOfQuestionAnswered,
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+  }
+
+  async _addNewAnswerToExisted({ OrganizationID, surveyID, answerId, newAnswer, existedAnswerData }){
+    const answerCollection = this._getAnswersCollection({ OrganizationID, surveyID });
+    const numberOfQuestionAnswered = existedAnswerData.answers.length + 1;
+    await answerCollection.doc(answerId).update({
+      answers: FieldValue.arrayUnion(newAnswer),
+      numberOfQuestionAnswered,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  }
+
+  async createOrUpdateAnswer({ OrganizationID, surveyID, answerId, answer }) {
     const existedAnswer = await this.getAnswerById({
       OrganizationID,
       surveyID,
       answerId,
     });
 
-    let numberOfQuestionAnswered = 0;
-    let answers = [];
-    let createdAt = FieldValue.serverTimestamp();
     const newAnswer = {
       ...answer,
       createdAt: new Date().getTime(),
     };
 
     if (!existedAnswer.exists) {
-      // await this._createNewAnswer({ OrganizationID, surveyID, answerId, answer })
-      numberOfQuestionAnswered = 1;
-      answers = [newAnswer];
-      await answerCollection.doc(answerId).set({
-        answers,
-        numberOfQuestionAnswered,
-        uid: answerId,
-        createdAt,
-      });
+      await this._createNewAnswer({ OrganizationID, surveyID, answerId, newAnswer })
     } else {
       const existedAnswerData = existedAnswer.data();
-      createdAt = existedAnswerData.createdAt;
       const existedAnswerQuestion = existedAnswerData.answers.find(
         (a) => a.questionID === answer.questionID
       );
-      numberOfQuestionAnswered = existedAnswerData.answers.length + 1;
 
       if (existedAnswerQuestion) {
-        numberOfQuestionAnswered = existedAnswerData.answers.length;
-        answers = existedAnswerData.answers.map((a) => {
-          if (a.questionID === answer.questionID) {
-            return {
-              ...a,
-              ...answer,
-            };
-          }
-          return a;
-        });
-        await answerCollection.doc(answerId).set(
-          {
-            answers,
-            numberOfQuestionAnswered,
-            updatedAt: FieldValue.serverTimestamp(),
-          },
-          { merge: true }
-        );
+        await this._updateExistedAnswer({ OrganizationID, surveyID, answerId, newAnswer, existedAnswerData })
       } else {
-        numberOfQuestionAnswered = existedAnswerData.answers.length + 1;
-        await answerCollection.doc(answerId).update({
-          answers: FieldValue.arrayUnion(newAnswer),
-          numberOfQuestionAnswered,
-          updatedAt: FieldValue.serverTimestamp(),
-        });
+        await this._addNewAnswerToExisted({ OrganizationID, surveyID, answerId, newAnswer, existedAnswerData })
       }
     }
   }
