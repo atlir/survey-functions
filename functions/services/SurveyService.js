@@ -1,9 +1,9 @@
 const FieldValue = require("firebase-admin").firestore.FieldValue;
-const FirebaseService = require("./FirebaseService");
+const FirebaseSingleton = require("./FirebaseSingleton");
 
-class SurveyService extends FirebaseService {
+class SurveyService{
   constructor() {
-    super();
+    this.db = FirebaseSingleton.instance.db;
   }
 
   _getSurveysCollection({ OrganizationID }) {
