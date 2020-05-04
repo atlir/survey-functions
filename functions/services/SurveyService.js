@@ -6,20 +6,20 @@ class SurveyService extends FirebaseService {
     super();
   }
 
-  _getSurveysCollection({ eventId }) {
-    return this.db.collection("events").doc(eventId).collection("surveys");
+  _getSurveysCollection({ OrganizationID }) {
+    return this.db.collection("events").doc(OrganizationID).collection("surveys");
   }
 
-  _getAnswersCollection({ eventId, surveyId }) {
-    const surveyCollection = this._getSurveysCollection({ eventId });
+  _getAnswersCollection({ OrganizationID, surveyID }) {
+    const surveyCollection = this._getSurveysCollection({ OrganizationID });
 
-    return surveyCollection.doc(surveyId).collection("answers");
+    return surveyCollection.doc(surveyID).collection("answers");
   }
 
-  async _getSurveyQuestions({ eventId, surveyId }) {
-    const surveyCollection = this._getSurveysCollection({ eventId });
+  async _getSurveyQuestions({ OrganizationID, surveyID }) {
+    const surveyCollection = this._getSurveysCollection({ OrganizationID });
 
-    const survey = await surveyCollection.doc(surveyId);
+    const survey = await surveyCollection.doc(surveyID);
 
     if (!survey.exists) {
       return [];
@@ -28,8 +28,8 @@ class SurveyService extends FirebaseService {
     return survey.questions || [];
   }
 
-  async getSurveyById({ eventId, surveyId }) {
-    const document = this._getSurveysCollection({ eventId }).doc(surveyId);
+  async getSurveyById({ OrganizationID, surveyID }) {
+    const document = this._getSurveysCollection({ OrganizationID }).doc(surveyID);
 
     const survey = await document.get();
 
@@ -40,8 +40,8 @@ class SurveyService extends FirebaseService {
     return survey;
   }
 
-  async getAnswerById({ eventId, surveyId, answerId }) {
-    const document = this._getAnswersCollection({ eventId, surveyId }).doc(
+  async getAnswerById({ OrganizationID, surveyID, answerId }) {
+    const document = this._getAnswersCollection({ OrganizationID, surveyID }).doc(
       answerId
     );
 
@@ -54,7 +54,7 @@ class SurveyService extends FirebaseService {
     return answer;
   }
 
-  async _createNewAnswer({ eventId, surveyId, answerId, newAnswer }) {
+  async _createNewAnswer({ OrganizationID, surveyID, answerId, newAnswer }) {
     let numberOfQuestionAnswered = 1;
     answers = [newAnswer];
     await answerCollection.doc(answerId).set({
@@ -65,15 +65,15 @@ class SurveyService extends FirebaseService {
     });
   }
 
-  async createOrUpdateAnswer({ eventId, surveyId, answerId, answer }) {
-    const answerCollection = this._getAnswersCollection({ eventId, surveyId });
+  async createOrUpdateAnswer({ OrganizationID, surveyID, answerId, answer }) {
+    const answerCollection = this._getAnswersCollection({ OrganizationID, surveyID });
     const surveyQuestions = await this._getSurveyQuestions({
-      eventId,
-      surveyId,
+      OrganizationID,
+      surveyID,
     });
     const existedAnswer = await this.getAnswerById({
-      eventId,
-      surveyId,
+      OrganizationID,
+      surveyID,
       answerId,
     });
 
@@ -86,7 +86,7 @@ class SurveyService extends FirebaseService {
     };
 
     if (!existedAnswer.exists) {
-      // await this._createNewAnswer({ eventId, surveyId, answerId, answer })
+      // await this._createNewAnswer({ OrganizationID, surveyID, answerId, answer })
       numberOfQuestionAnswered = 1;
       answers = [newAnswer];
       await answerCollection.doc(answerId).set({
@@ -133,8 +133,8 @@ class SurveyService extends FirebaseService {
     }
   }
 
-  async deleteAnswerById({ eventId, surveyId, answerId}){
-    const answerCollection = this._getAnswersCollection({ eventId, surveyId });
+  async deleteAnswerById({ OrganizationID, surveyID, answerId}){
+    const answerCollection = this._getAnswersCollection({ OrganizationID, surveyID });
 
     return answerCollection.doc(answerId).delete();
   }

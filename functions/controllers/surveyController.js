@@ -3,12 +3,12 @@ const SurveyService = require("./../services/SurveyService");
 module.exports = {
   createOrUpdateAnswer: async (req, res) => {
     try {
-      const { eventId, surveyId, uid: answerId, ...answer } = req.body;
+      const { OrganizationID, surveyID, uid: answerId, ...answer } = req.body;
       const service = new SurveyService();
 
       await service.createOrUpdateAnswer({
-        eventId,
-        surveyId,
+        OrganizationID,
+        surveyID,
         answerId,
         answer,
       });
@@ -21,26 +21,26 @@ module.exports = {
 
   getSurveyById: async (req, res) => {
     try {
-      const { eventId, surveyId } = req.params;
+      const { OrganizationID, surveyID } = req.params;
 
-      if (!eventId || !surveyId) {
+      if (!OrganizationID || !surveyID) {
         return res
           .status(400)
           .send(
-            "Bad request. Request must have eventId and surveyId parameters"
+            "Bad request. Request must have OrganizationID and surveyID parameters"
           );
       }
 
       const service = new SurveyService();
       const surveyFromService = await service.getSurveyById({
-        eventId,
-        surveyId,
+        OrganizationID,
+        surveyID,
       });
 
       if (!surveyFromService.exists) {
         return res
           .status(400)
-          .send("Bad request. There no survey with ID => ", surveyId);
+          .send("Bad request. There no survey with ID => ", surveyID);
       }
 
       return res.status(200).send(surveyFromService.data());
@@ -52,13 +52,13 @@ module.exports = {
 
   getAnswerById: async (req, res) => {
     try {
-      const { eventId, surveyId, userId: answerId } = req.params;
+      const { OrganizationID, surveyID, userID: answerId } = req.params;
 
       const service = new SurveyService();
 
       const existedAnswer = await service.getAnswerById({
-        eventId,
-        surveyId,
+        OrganizationID,
+        surveyID,
         answerId,
       });
 
@@ -74,13 +74,13 @@ module.exports = {
   },
 
   deleteAnswerById: async (req, res) => {
-    const { eventId, surveyId, userId: answerId } = req.params;
+    const { OrganizationID, surveyID, userID: answerId } = req.params;
 
     const service = new SurveyService();
     
     await service.deleteAnswerById({
-      eventId,
-      surveyId,
+      OrganizationID,
+      surveyID,
       answerId,
     });
 

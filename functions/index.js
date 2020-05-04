@@ -14,13 +14,13 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 
-app.get("/api/events/:eventId/surveys/:surveyId", surveyController.getSurveyById);
+app.get("/api/events/:OrganizationID/surveys/:surveyID", surveyController.getSurveyById);
 
 app.post("/api/answers", surveyController.createOrUpdateAnswer);
 
-app.get("/api/events/:eventId/surveys/:surveyId/answers/:userId", surveyController.getAnswerById);
+app.get("/api/events/:OrganizationID/surveys/:surveyID/answers/:userID", surveyController.getAnswerById);
 
-app.delete("/api/events/:eventId/surveys/:surveyId/answers/:userId", surveyController.deleteAnswerById);
+app.delete("/api/events/:OrganizationID/surveys/:surveyID/answers/:userID", surveyController.deleteAnswerById);
 
 
 app.use((req, res, next) => {
