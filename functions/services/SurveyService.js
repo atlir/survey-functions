@@ -132,6 +132,12 @@ class SurveyService extends FirebaseService {
       }
     }
   }
+
+  async deleteAnswerById({ eventId, surveyId, answerId}){
+    const answerCollection = this._getAnswersCollection({ eventId, surveyId });
+
+    return answerCollection.doc(answerId).delete();
+  }
 }
 
 module.exports = SurveyService;

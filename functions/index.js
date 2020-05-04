@@ -20,6 +20,9 @@ app.post("/api/answers", surveyController.createOrUpdateAnswer);
 
 app.get("/api/events/:eventId/surveys/:surveyId/answers/:userId", surveyController.getAnswerById);
 
+app.delete("/api/events/:eventId/surveys/:surveyId/answers/:userId", surveyController.deleteAnswerById);
+
+
 app.use((req, res, next) => {
   res.status(404).send("This method is unsupported");
 });

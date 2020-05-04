@@ -6,7 +6,12 @@ module.exports = {
       const { eventId, surveyId, uid: answerId, ...answer } = req.body;
       const service = new SurveyService();
 
-      await service.createOrUpdateAnswer({ eventId, surveyId, answerId, answer });
+      await service.createOrUpdateAnswer({
+        eventId,
+        surveyId,
+        answerId,
+        answer,
+      });
       return res.status(200).send();
     } catch (error) {
       console.error(error);
@@ -58,16 +63,27 @@ module.exports = {
       });
 
       if (!existedAnswer.exists) {
-        return res
-          .status(200)
-          .send({});
+        return res.status(200).send({});
       }
 
       return res.status(200).send(existedAnswer.data());
-
     } catch (error) {
       console.error(error);
       return res.status(500).send("Internal server error");
     }
+  },
+
+  deleteAnswerById: async (req, res) => {
+    const { eventId, surveyId, userId: answerId } = req.params;
+
+    const service = new SurveyService();
+    
+    await service.deleteAnswerById({
+      eventId,
+      surveyId,
+      answerId,
+    });
+
+    return res.status(201).send();
   },
 };
