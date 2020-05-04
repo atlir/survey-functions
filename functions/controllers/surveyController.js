@@ -1,9 +1,29 @@
 const SurveyService = require("./../services/SurveyService");
 
+const _answerFields = ["uid", "surveyID", "OrganizationID", "questionId", "questionLabel", "answer"];
+
+function _validateAnswerBody(body){
+  const fields = Object.keys(body).map(key =>{
+    return _answerFields.includes(key)
+  })
+
+  return fields.reduce((acc, field) => {
+    return acc && field
+  }, true)
+}
+
+
 module.exports = {
+
   createOrUpdateAnswer: async (req, res) => {
     try {
+      const isAnswerValid = _validateAnswerBody(req.body)
+
+      if(!isAnswerValid){
+        return res.status(400).send("Bad request");
+      }
       const { OrganizationID, surveyID, uid: answerId, ...answer } = req.body;
+
       const service = new SurveyService();
 
       await service.createOrUpdateAnswer({
