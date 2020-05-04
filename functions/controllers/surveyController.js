@@ -4,7 +4,6 @@ module.exports = {
   createOrUpdateAnswer: async (req, res) => {
     try {
       const { eventId, surveyId, uid: answerId, ...answer } = req.body;
-
       const service = new SurveyService();
 
       await service.createOrUpdateAnswer({ eventId, surveyId, answerId, answer });
@@ -60,8 +59,8 @@ module.exports = {
 
       if (!existedAnswer.exists) {
         return res
-          .status(400)
-          .send("Bad request. There no answer with ID => ", answerId);
+          .status(200)
+          .send({});
       }
 
       return res.status(200).send(existedAnswer.data());

@@ -54,6 +54,17 @@ class SurveyService extends FirebaseService {
     return answer;
   }
 
+  async _createNewAnswer({ eventId, surveyId, answerId, newAnswer }) {
+    let numberOfQuestionAnswered = 1;
+    answers = [newAnswer];
+    await answerCollection.doc(answerId).set({
+      answers,
+      numberOfQuestionAnswered,
+      uid: answerId,
+      createdAt,
+    });
+  }
+
   async createOrUpdateAnswer({ eventId, surveyId, answerId, answer }) {
     const answerCollection = this._getAnswersCollection({ eventId, surveyId });
     const surveyQuestions = await this._getSurveyQuestions({
@@ -69,48 +80,57 @@ class SurveyService extends FirebaseService {
     let numberOfQuestionAnswered = 0;
     let answers = [];
     let createdAt = FieldValue.serverTimestamp();
-
     const newAnswer = {
       ...answer,
-      createdAt: FieldValue.serverTimestamp(),
+      createdAt: new Date().getTime(),
     };
 
     if (!existedAnswer.exists) {
+      // await this._createNewAnswer({ eventId, surveyId, answerId, answer })
       numberOfQuestionAnswered = 1;
-      answers = [
-        newAnswer
-      ];
+      answers = [newAnswer];
+      await answerCollection.doc(answerId).set({
+        answers,
+        numberOfQuestionAnswered,
+        uid: answerId,
+        createdAt,
+      });
     } else {
       const existedAnswerData = existedAnswer.data();
       createdAt = existedAnswerData.createdAt;
-      const existedAnswerQuestion = existedAnswerData.answers.find(a => a.questionID === answer.questionID)
+      const existedAnswerQuestion = existedAnswerData.answers.find(
+        (a) => a.questionID === answer.questionID
+      );
+      numberOfQuestionAnswered = existedAnswerData.answers.length + 1;
 
-      if(existedAnswerQuestion){
+      if (existedAnswerQuestion) {
         numberOfQuestionAnswered = existedAnswerData.answers.length;
-        answers = existedAnswerData.answers.map(a => {
-          if(a.questionID === answer.questionID){
+        answers = existedAnswerData.answers.map((a) => {
+          if (a.questionID === answer.questionID) {
             return {
+              ...a,
               ...answer,
-              createdAt: a.createdAt || createdAt,
-            }
+            };
           }
           return a;
-        })
-      }else{
+        });
+        await answerCollection.doc(answerId).set(
+          {
+            answers,
+            numberOfQuestionAnswered,
+            updatedAt: FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+      } else {
         numberOfQuestionAnswered = existedAnswerData.answers.length + 1;
-        answers = [
-          ...existedAnswerData.answers,
-          newAnswer
-        ]
+        await answerCollection.doc(answerId).update({
+          answers: FieldValue.arrayUnion(newAnswer),
+          numberOfQuestionAnswered,
+          updatedAt: FieldValue.serverTimestamp(),
+        });
       }
     }
-
-    answerCollection.doc(answerId).set({
-      answers,
-      numberOfQuestionAnswered,
-      uid: answerId,
-      createdAt,
-    });
   }
 }
 

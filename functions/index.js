@@ -1,14 +1,17 @@
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
+const cors = require('cors')({origin: true});
+const bodyParser = require('body-parser')
 const surveyController = require('./controllers/surveyController');
 
 const app = express();
 
-app.use(cors({ origin: true }));
-
+app.use(cors);
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+// parse application/json
+app.use(bodyParser.json())
 
 
 app.get("/api/events/:eventId/surveys/:surveyId", surveyController.getSurveyById);
