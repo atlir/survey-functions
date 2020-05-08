@@ -41,7 +41,7 @@ module.exports = {
 
   getSurveyById: async (req, res) => {
     try {
-      const { OrganizationID, surveyID } = req.params;
+      const { OrganizationID, surveyID } = req.query;
 
       if (!OrganizationID || !surveyID) {
         return res
@@ -72,7 +72,7 @@ module.exports = {
 
   getAnswerById: async (req, res) => {
     try {
-      const { OrganizationID, surveyID, userID: answerId } = req.params;
+      const { OrganizationID, surveyID, userID: answerId } = req.query;
 
       const service = new SurveyService();
 
@@ -94,7 +94,7 @@ module.exports = {
   },
 
   deleteAnswerById: async (req, res) => {
-    const { OrganizationID, surveyID, userID: answerId } = req.params;
+    const { OrganizationID, surveyID, userID: answerId } = req.query;
 
     const service = new SurveyService();
     
